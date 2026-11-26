@@ -22,10 +22,10 @@ version = 1.0.0
 requirements = python3,kivy==2.3.0,kivymd==2.0.1,yt-dlp,requests,certifi,urllib3,idna,charset-normalizer,ffmpeg
 
 # Android settings
-android.api = 30
+android.api = 36
 android.minapi = 24
 android.ndk = 25b
-android.ndk_api = 21
+android.ndk_api = 27
 android.archs = arm64-v8a, armeabi-v7a
 
 # Keeps first builds smaller
