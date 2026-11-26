@@ -32,7 +32,6 @@ jobs:
             zlib1g-dev libncurses-dev libtinfo6 cmake libffi-dev libssl-dev \
             automake build-essential ccache
 
-
       - name: Install Buildozer & Cython
         run: |
           python -m pip install --upgrade pip
