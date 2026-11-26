@@ -1,59 +1,74 @@
-# KHSahibi VDownloader
+# Sahibi Budget App
 
-A modern Android app built with Python/KivyMD for downloading video, audio, and images from any website.
+A beautiful, modern budget tracking app built with KivyMD featuring:
+- **Category dropdown menu** with default categories (Groceries, Electric, Transport, etc.)
+- **Add custom categories** with icons and colors
+- **Salary tracking** with automatic deduction from expenses
+- **Expense logging** with notes and categories
+- **Category filtering** with chip-based UI
+- **Data persistence** (local JSON storage)
+- **Dark/Light theme** toggle
+- **Modern Material Design 3** UI
 
 ## Features
 
-- **Multi-platform support**: Download from YouTube, TikTok, Instagram, Twitter/X, Facebook, and 1000+ sites using yt-dlp
-- **Media types**: Download video, audio, and images
-- **Format selection**: Choose quality and format before downloading
-- **Download management**: View history, cancel ongoing downloads, open downloaded files
-- **Material Design UI**: Beautiful dark/light theme with Material You dynamic colors
-- **Clipboard integration**: Paste URL from clipboard automatically
-- **Download history**: Track all downloads, view progress, and manage files
+### Category Dropdown Menu
+- Pre-loaded categories: Groceries, Electric, Transport, Entertainment, Healthcare, Education, Shopping, Other
+- **Add custom categories** with custom icons (Material Icons) and colors
+- **Filter expenses** by tapping category chips
+- **Delete custom categories** (built-in protected)
 
-## Screens
+### Salary & Expense Tracking
+- Set monthly salary
+- **Expenses automatically deduct from salary**
+- Remaining balance shown in real-time
+- Color-coded: Green (positive), Red (negative)
+- Add notes to both salary and expenses
 
-1. **Main** - URL input, quick action buttons, download progress list
-2. **Settings** - Appearance, download preferences, network settings
-3. **History** - View and manage past downloads
+### Modern UI Design
+- Gradient salary card with icons
+- Horizontal scrollable category filter chips
+- Smooth animations and transitions
+- Material Design 3 components
+- Dark/Light theme support
+- Navigation drawer for settings
 
-## Installation
+## Building APK
 
-### From Source
+### GitHub Actions (Recommended)
+1. Push this folder to GitHub repository
+2. Go to **Actions** tab
+3. Click **"Build Budget App APK"**
+4. Click **"Run workflow"** → **"debug"** → **"Run workflow"**
+5. Wait 10-20 minutes
+6. Download APK from **Artifacts**
 
+### Local Build (Linux/WSL)
 ```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the app
-python main.py
+pip install cython==0.29.36 buildozer
+buildozer -v android debug
 ```
 
-### Buildozer (Android APK)
+## Project Structure
+```
+sahibi-budget-app/
+├── .github/workflows/build-apk.yml   # GitHub Actions CI/CD
+├── buildozer.spec                    # Buildozer configuration
+├── main.py                           # Complete app (single file)
+└── README.md
+```
 
-1. Install buildozer: `pip install buildozer`
-2. Configure your Android development environment
-3. Build: `buildozer android debug apk`
-4. Install the APK on your device
+## Requirements
+- Python 3.10 (pinned for buildozer compatibility)
+- kivy, kivymd
+- Android API 21+ (Android 5.0+)
 
-## Usage
-
-1. Paste any video/audio/image URL in the input field
-2. Tap "Analyze & Download" to see available formats
-3. Select your preferred quality and format
-4. Wait for download to complete
-5. View downloaded files in the History screen
-
-## Supported Sites
-
-Supports over 1000 websites including:
-- YouTube, YouTube Music
-- TikTok, Instagram, Twitter/X, Facebook
-- Vimeo, Dailymotion, Twitch
-- SoundCloud, Spotify (audio extraction)
-- And many more via yt-dlp
+## Data Storage
+Data saved locally as JSON:
+- Salary amount
+- All expenses with category, note, date
+- Custom categories
+- Theme preference
 
 ## License
-
-MIT License - feel free to modify and distribute
+Personal use - Sahibi Budget App
