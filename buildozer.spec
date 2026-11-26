@@ -66,6 +66,14 @@ android.ndk_api = 21
 android.private_storage = True
 
 # (str) Android entry point, default is ok for Kivy-based app
+# Automatically accept SDK license
+android.accept_sdk_license = True
+
+# Allow SDK updates
+android.skip_update = False
+
+# Set the build tools version (optional but recommended)
+android.build_tools_version = 33.0.1
 # android.entrypoint = org.kivy.android.PythonActivity
 
 # (list) List of Java .jar files to add to the libs so that pyjnius can access
