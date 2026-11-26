@@ -46,6 +46,14 @@ jobs:
             ~/.buildozer
           key: buildozer-v3-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
 
+      - name: Download KivyMD 2.0 locally
+        run: |
+          curl -L https://github.com -o kivymd.zip
+          unzip -q kivymd.zip
+          rm -rf kivymd
+          mv KivyMD-master/kivymd ./kivymd
+          rm -rf KivyMD-master kivymd.zip
+
       - name: Build debug APK
         run: |
           set -o pipefail
