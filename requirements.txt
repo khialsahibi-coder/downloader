@@ -1,7 +1,7 @@
 # KHSahibi VDownloader - Python Dependencies
 # For buildozer (Python-for-Android)
 
-python3==3.11
+python3==3.10.11
 kivy==2.3.0
 kivymd==2.0.1
 yt-dlp==2024.12.2
