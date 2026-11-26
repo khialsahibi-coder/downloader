@@ -47,6 +47,7 @@ jobs:
 
       - name: Build debug APK
         run: |
+          set -o pipefail
           buildozer -v android debug 2>&1 | tee buildozer.log || {
             echo "================ EXACT ERROR ================"
             grep -iE "error:|exception|failed|clang:|fatal:" buildozer.log | tail -n 30
@@ -60,3 +61,4 @@ jobs:
         with:
           name: package
           path: bin/*.apk
+          if-no-files-found: error
