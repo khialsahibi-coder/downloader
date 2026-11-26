@@ -62,6 +62,7 @@ jobs:
           pip install --upgrade pip setuptools wheel
           pip install cython==0.29.36
           pip install buildozer
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Build APK
         env:
