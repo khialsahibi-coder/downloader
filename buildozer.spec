@@ -19,7 +19,7 @@ source.include_exts = py,kv,png,jpg,atlas,txt,xml,json,ttf
 version = 1.0.0
 
 # Requirements
-requirements = python3,kivy==2.3.0,kivymd==2.0.1,yt-dlp,requests,certifi,urllib3,idna,charset-normalizer,ffmpeg
+requirements = python3,kivy==2.3.0,kivymd==2.0.1,yt-dlp,requests,certifi,urllib3,idna,charset-normalizer
 
 # Android settings
 android.api = 36
