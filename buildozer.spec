@@ -21,11 +21,19 @@ version = 1.0.0
 # Requirements
 requirements = python3,kivy==2.3.0,kivymd==2.0.1,yt-dlp,requests,certifi,urllib3,idna,charset-normalizer,ffmpeg
 
-# Android settings
-android.api = 34
-android.minapi = 24
+# (str) Android API to use
+android.api = 33
+
+# (int) Minimum API required
+android.minapi = 21
+
+# (str) Android NDK version to use
 android.ndk = 25b
+
+# (str) Andriod NDK api
 android.ndk_api = 24
+
+# (str) Andriod archs
 android.archs = arm64-v8a, armeabi-v7a
 
 # Keeps first builds smaller
