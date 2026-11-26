@@ -43,9 +43,17 @@ jobs:
             ~/.buildozer/android/platform/android-ndk-r25b
           key: android-sdk-ndk-${{ hashFiles('buildozer.spec') }}
           restore-keys: android-sdk-ndk-
-
+          
       - name: Build debug APK
-        run: buildozer -v android debug
+        run: |
+         buildozer -v android debug 2>&1 | tee buildozer.log || {
+         echo "================ EXACT ERROR ================"
+         grep -iE "error:|exception|failed|clang:|fatal:" buildozer.log | tail -n 30
+         echo "================ LAST 25 LINES ==============="
+         tail -n 25 buildozer.log
+         exit 1
+         }
+
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
