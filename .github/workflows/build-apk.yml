@@ -28,9 +28,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            git zip unzip autoconf libtool pkg-config \
+            git zip unzip autoconf libtool libltdl-dev pkg-config \
             zlib1g-dev libncurses-dev libtinfo6 cmake libffi-dev libssl-dev \
             automake build-essential ccache
+
 
       - name: Install Buildozer & Cython
         run: |
@@ -43,7 +44,7 @@ jobs:
           path: |
             .buildozer
             ~/.buildozer
-          key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
+          key: buildozer-v2-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
 
       - name: Build debug APK
         run: |
