@@ -20,7 +20,7 @@ jobs:
   build:
     name: Build Android APK
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
 
     steps:
       - name: Checkout repository
@@ -30,8 +30,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          # No pip cache - buildozer uses buildozer.spec for dependencies
-          cache: ''
 
       - name: Install system dependencies
         run: |
@@ -39,17 +37,27 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             git zip unzip openjdk-17-jdk python3-pip autoconf libtool \
             pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev \
-            cmake libffi-dev libssl-dev
+            cmake libffi-dev libssl-dev libtinfo6
 
-      - name: Install ncurses legacy libs (Ubuntu 26.04+)
-        run: |
-          sudo apt-get install -y libtinfo6 2>/dev/null || sudo apt-get install -y libncurses-dev 2>/dev/null || true
+      - name: Cache Buildozer global directory
+        uses: actions/cache@v4
+        with:
+          path: ~/.buildozer
+          key: buildozer-${{ hashFiles('buildozer.spec') }}
+          restore-keys: |
+            buildozer-
 
-      - name: Accept Android SDK licenses
-        run: |
-          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+      - name: Cache Android SDK/NDK
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.buildozer/android/platform/android-sdk
+            ~/.buildozer/android/platform/android-ndk-r25b
+          key: android-sdk-ndk-${{ hashFiles('buildozer.spec') }}
+          restore-keys: |
+            android-sdk-ndk-
 
-      - name: Install buildozer with pinned dependencies
+      - name: Install buildozer
         run: |
           pip install --upgrade pip setuptools wheel
           pip install cython==0.29.36
@@ -57,9 +65,16 @@ jobs:
 
       - name: Build APK
         env:
-          ANDROID_SDK_ROOT: /usr/lib/android-sdk
-          ANDROID_NDK_HOME: /usr/lib/android-sdk/ndk/25.2.9519653
+          # Force Java 17 so sdkmanager doesn't crash silently
+          JAVA_HOME: /usr/lib/jvm/temurin-17-jdk-amd64
+          # DO NOT set ANDROID_SDK_ROOT here. Let Buildozer manage it.
         run: |
+          # Clean up unnecessary files to save disk space (prevents "No space left" errors)
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          
           buildozer -v android debug
 
       - name: Rename APK
@@ -93,8 +108,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          # No requirements.txt - buildozer uses buildozer.spec for dependencies
-          cache: ''
 
       - name: Install system dependencies
         run: |
@@ -102,17 +115,17 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             git zip unzip openjdk-17-jdk python3-pip autoconf libtool \
             pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev \
-            cmake libffi-dev libssl-dev
+            cmake libffi-dev libssl-dev libtinfo6
 
-      - name: Install ncurses legacy libs (Ubuntu 26.04+)
-        run: |
-          sudo apt-get install -y libtinfo6 2>/dev/null || sudo apt-get install -y libncurses-dev 2>/dev/null || true
+      - name: Cache Buildozer global directory
+        uses: actions/cache@v4
+        with:
+          path: ~/.buildozer
+          key: buildozer-${{ hashFiles('buildozer.spec') }}
+          restore-keys: |
+            buildozer-
 
-      - name: Accept Android SDK licenses
-        run: |
-          yes | sdkmanager --licenses > /dev/null 2>&1 || true
-
-      - name: Install buildozer with pinned dependencies
+      - name: Install buildozer
         run: |
           pip install --upgrade pip setuptools wheel
           pip install cython==0.29.36
@@ -120,9 +133,13 @@ jobs:
 
       - name: Build Release APK
         env:
-          ANDROID_SDK_ROOT: /usr/lib/android-sdk
-          ANDROID_NDK_HOME: /usr/lib/android-sdk/ndk/25.2.9519653
+          JAVA_HOME: /usr/lib/jvm/temurin-17-jdk-amd64
         run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          
           buildozer -v android release
 
       - name: Rename Release APK
