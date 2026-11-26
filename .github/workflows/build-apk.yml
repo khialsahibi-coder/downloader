@@ -45,7 +45,23 @@ jobs:
           restore-keys: android-sdk-ndk-
 
       - name: Build debug APK
-        run: buildozer -v android debug
+        run: |
+          # 1. Force Java 17 (Fixes the silent sdkmanager crash)
+          export JAVA_HOME=/usr/lib/jvm/temurin-17-jdk-amd64
+          export PATH=$JAVA_HOME/bin:$PATH
+          java -version # This will print the version to confirm it's 17
+
+          # 2. Free up disk space (Android SDK is huge)
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          
+          # 3. Clean up any previous failed builds
+          rm -rf .buildozer
+
+          # 4. Run buildozer
+          buildozer -v android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
