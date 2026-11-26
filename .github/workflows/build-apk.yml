@@ -48,11 +48,10 @@ jobs:
 
       - name: Download KivyMD 2.0 locally
         run: |
-          curl -L https://github.com -o kivymd.zip
-          unzip -q kivymd.zip
-          rm -rf kivymd
-          mv KivyMD-master/kivymd ./kivymd
-          rm -rf KivyMD-master kivymd.zip
+          rm -rf kivymd KivyMD-temp
+          git clone --depth 1 https://github.com KivyMD-temp
+          mv KivyMD-temp/kivymd ./kivymd
+          rm -rf KivyMD-temp
 
       - name: Build debug APK
         run: |
