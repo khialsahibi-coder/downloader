@@ -39,14 +39,6 @@ android.permissions = INTERNET,ACCESS_NETWORK_STATE,READ_EXTERNAL_STORAGE,WRITE_
 # Features
 android.features = android.hardware.touchscreen
 
-# Presplash
-android.presplash = presplash.png
-
-# Icon / presplash are optional - comment out if the files are missing,
-# buildozer errors out when a listed asset does not exist.
-# android.presplash = assets/presplash.png
-# android.icon = assets/icon.png
-
 # Orientation
 orientation = portrait
 
