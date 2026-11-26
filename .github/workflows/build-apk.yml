@@ -2,42 +2,18 @@ name: Build Budget App APK
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
-    inputs:
-      build_type:
-        description: 'Build type'
-        required: true
-        default: 'debug'
-        type: choice
-        options:
-          - debug
-          - release
 
 jobs:
   build:
     name: Build Android APK
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y --no-install-recommends \
-            git zip unzip openjdk-17-jdk python3-pip autoconf libtool \
-            pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev \
-            cmake libffi-dev libssl-dev libtinfo6
 
       - name: Free up disk space
         run: |
@@ -46,126 +22,59 @@ jobs:
           sudo rm -rf /opt/ghc
           sudo rm -rf /usr/local/share/boost
           sudo docker image prune --all --force
-          df -h /     
-
-      - name: Cache Buildozer global directory
-        uses: actions/cache@v4
-        with:
-          path: ~/.buildozer
-          key: buildozer-${{ hashFiles('buildozer.spec') }}
-          restore-keys: |
-            buildozer-
-
-      - name: Cache Android SDK/NDK
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.buildozer/android/platform/android-sdk
-            ~/.buildozer/android/platform/android-ndk-r25b
-          key: android-sdk-ndk-${{ hashFiles('buildozer.spec') }}
-          restore-keys: |
-            android-sdk-ndk-
-
-      - name: Install buildozer
-        run: |
-          pip install --upgrade pip setuptools wheel
-          pip install cython==0.29.36
-          pip install buildozer
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Build APK
-        env:
-          # Force Java 17 so sdkmanager doesn't crash silently
-          JAVA_HOME: /usr/lib/jvm/temurin-17-jdk-amd64
-          # DO NOT set ANDROID_SDK_ROOT here. Let Buildozer manage it.
-        run: |
-          # Clean up unnecessary files to save disk space (prevents "No space left" errors)
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf "/usr/local/share/boost"
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          
-          buildozer -v android debug
-
-      - name: Rename APK
-        run: |
-          if [ -f bin/*.apk ]; then
-            cp bin/*.apk bin/Sahibi-Budget-App-debug.apk
-            echo "APK built successfully"
-            ls -la bin/
-          else
-            echo "No APK found in bin/"
-            exit 1
-          fi
-
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Sahibi-Budget-App-APK
-          path: bin/Sahibi-Budget-App-debug.apk
-          retention-days: 30
-
-  build-release:
-    name: Build Release APK
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.build_type == 'release'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+          df -h /
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
       - name: Install system dependencies
         run: |
           sudo apt-get update -y
           sudo apt-get install -y --no-install-recommends \
-            git zip unzip openjdk-17-jdk python3-pip autoconf libtool \
-            pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev \
-            cmake libffi-dev libssl-dev libtinfo6
+            git zip unzip autoconf automake libtool pkg-config \
+            zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 \
+            cmake libffi-dev libssl-dev build-essential ccache
 
-      - name: Cache Buildozer global directory
-        uses: actions/cache@v4
-        with:
-          path: ~/.buildozer
-          key: buildozer-${{ hashFiles('buildozer.spec') }}
-          restore-keys: |
-            buildozer-
-
-      - name: Install buildozer
+      - name: Install Python dependencies
         run: |
           pip install --upgrade pip setuptools wheel
           pip install cython==0.29.36
           pip install buildozer
 
-      - name: Build Release APK
-        env:
-          JAVA_HOME: /usr/lib/jvm/temurin-17-jdk-amd64
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf "/usr/local/share/boost"
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          
-          buildozer -v android release
+      - name: Cache Buildozer files
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.buildozer
+            .buildozer
+          key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
+          restore-keys: |
+            buildozer-${{ runner.os }}-
 
-      - name: Rename Release APK
+      - name: Check Java version
         run: |
-          if [ -f bin/*.apk ]; then
-            cp bin/*.apk bin/Sahibi-Budget-App-release.apk
-            echo "Release APK built successfully"
-            ls -la bin/
-          else
-            echo "No APK found in bin/"
-            exit 1
-          fi
+          java -version
+          echo "JAVA_HOME=$JAVA_HOME"
 
-      - name: Upload Release APK artifact
+      - name: Build APK
+        run: buildozer -v android debug
+
+      - name: Rename APK
+        run: |
+          ls -la bin/
+          mv bin/*.apk bin/SahibiBudget.apk
+
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Sahibi-Budget-App-Release-APK
-          path: bin/Sahibi-Budget-App-release.apk
-          retention-days: 30
+          name: SahibiBudget-APK
+          path: bin/SahibiBudget.apk
+          if-no-files-found: error
