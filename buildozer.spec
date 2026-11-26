@@ -19,7 +19,7 @@ source.include_exts = py,kv,png,jpg,atlas,txt,xml,json,ttf
 version = 1.0.0
 
 # Requirements
-requirements = python3==3.11.8,hostpython3==3.11.8,kivy==2.3.0,materialyoucolor,asynckivy,asyncgui,yt-dlp,requests,certifi,urllib3,idna,charset-normalizer
+requirements = python3==3.11,hostpython3==3.11,kivy==2.3.0,materialyoucolor,asynckivy,asyncgui,yt-dlp,requests,certifi,urllib3,idna,charset-normalizer,ffmpeg
 
 
 # Android settings
