@@ -1,71 +1,144 @@
-name: Build KHSahibi APK
+name: Build Budget App APK
 
 on:
   push:
-    branches: [main, master]
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
   workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+          - debug
+          - release
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          # No pip cache - buildozer uses buildozer.spec for dependencies
+          cache: ''
 
       - name: Install system dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            git zip unzip openjdk-17-jdk python3-pip \
-            autoconf libtool pkg-config zlib1g-dev \
-            libncurses5-dev libncursesw5-dev libtinfo5 \
-            cmake libffi-dev libssl-dev ccache automake
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends \
+            git zip unzip openjdk-17-jdk python3-pip autoconf libtool \
+            pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev \
+            cmake libffi-dev libssl-dev
 
-      - name: Install buildozer
+      - name: Install ncurses legacy libs (Ubuntu 26.04+)
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install --user buildozer cython==0.29.36
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          sudo apt-get install -y libtinfo6 2>/dev/null || sudo apt-get install -y libncurses-dev 2>/dev/null || true
 
-      - name: Cache buildozer global directory
-        uses: actions/cache@v4
-        with:
-          path: ~/.buildozer
-          key: buildozer-${{ hashFiles('buildozer.spec') }}
-          restore-keys: buildozer-
-
-      - name: Cache android SDK/NDK
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.buildozer/android/platform/android-sdk
-            ~/.buildozer/android/platform/android-ndk-r25b
-          key: android-sdk-ndk-${{ hashFiles('buildozer.spec') }}
-          restore-keys: android-sdk-ndk-
-
-      - name: Build debug APK
+      - name: Accept Android SDK licenses
         run: |
-          # 1. Force Java 17 (Fixes the silent sdkmanager crash)
-          export JAVA_HOME=/usr/lib/jvm/temurin-17-jdk-amd64
-          export PATH=$JAVA_HOME/bin:$PATH
-          java -version # This will print the version to confirm it's 17
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
 
-          # 2. Free up disk space (Android SDK is huge)
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf "/usr/local/share/boost"
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          
-          # 3. Clean up any previous failed builds
-          rm -rf .buildozer
+      - name: Install buildozer with pinned dependencies
+        run: |
+          pip install --upgrade pip setuptools wheel
+          pip install cython==0.29.36
+          pip install buildozer
 
-          # 4. Run buildozer
+      - name: Build APK
+        env:
+          ANDROID_SDK_ROOT: /usr/lib/android-sdk
+          ANDROID_NDK_HOME: /usr/lib/android-sdk/ndk/25.2.9519653
+        run: |
           buildozer -v android debug
 
-      - name: Upload APK
+      - name: Rename APK
+        run: |
+          if [ -f bin/*.apk ]; then
+            cp bin/*.apk bin/Sahibi-Budget-App-debug.apk
+            echo "APK built successfully"
+            ls -la bin/
+          else
+            echo "No APK found in bin/"
+            exit 1
+          fi
+
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: khsahibi-vdownloader-apk
-          path: bin/*.apk
-          if-no-files-found: error
+          name: Sahibi-Budget-App-APK
+          path: bin/Sahibi-Budget-App-debug.apk
+          retention-days: 30
+
+  build-release:
+    name: Build Release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.build_type == 'release'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          # No requirements.txt - buildozer uses buildozer.spec for dependencies
+          cache: ''
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends \
+            git zip unzip openjdk-17-jdk python3-pip autoconf libtool \
+            pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev \
+            cmake libffi-dev libssl-dev
+
+      - name: Install ncurses legacy libs (Ubuntu 26.04+)
+        run: |
+          sudo apt-get install -y libtinfo6 2>/dev/null || sudo apt-get install -y libncurses-dev 2>/dev/null || true
+
+      - name: Accept Android SDK licenses
+        run: |
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+
+      - name: Install buildozer with pinned dependencies
+        run: |
+          pip install --upgrade pip setuptools wheel
+          pip install cython==0.29.36
+          pip install buildozer
+
+      - name: Build Release APK
+        env:
+          ANDROID_SDK_ROOT: /usr/lib/android-sdk
+          ANDROID_NDK_HOME: /usr/lib/android-sdk/ndk/25.2.9519653
+        run: |
+          buildozer -v android release
+
+      - name: Rename Release APK
+        run: |
+          if [ -f bin/*.apk ]; then
+            cp bin/*.apk bin/Sahibi-Budget-App-release.apk
+            echo "Release APK built successfully"
+            ls -la bin/
+          else
+            echo "No APK found in bin/"
+            exit 1
+          fi
+
+      - name: Upload Release APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sahibi-Budget-App-Release-APK
+          path: bin/Sahibi-Budget-App-release.apk
+          retention-days: 30
