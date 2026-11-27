@@ -19,7 +19,7 @@ os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
 
 # Kivy imports
 import kivy
-kivy.require('2.3.0')
+kivy.require('2.3.1')
 
 from kivy.lang import Builder
 from kivy.clock import Clock, mainthread
