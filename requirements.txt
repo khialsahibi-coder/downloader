@@ -2,7 +2,7 @@
 # For buildozer (Python-for-Android)
 
 python3==''
-kivy==2.3.0
+kivy==leatest
 kivymd==2.0.1
 yt-dlp==2024.12.2
 requests==2.32.3
