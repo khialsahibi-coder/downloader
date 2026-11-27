@@ -28,7 +28,7 @@ android.api = 36
 android.minapi = 24
 android.ndk = 25b
 android.ndk_api = 27
-android.archs = arm64-v8a, armeabi-v7a
+android.archs = arm64-v8a
 
 # Keeps first builds smaller
 android.accept_sdk_license = True
