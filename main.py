@@ -12,6 +12,13 @@ import re
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Dict, List, Any
+import certifi
+
+os.environ["SSL_CERT_FILE"] = certifi.where()
+os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
+
+import kivy
+kivy.require("2.3.0")
 
 # Kivy imports
 import kivy
