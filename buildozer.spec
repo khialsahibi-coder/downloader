@@ -19,9 +19,7 @@ source.include_exts = py,kv,png,jpg,atlas,txt,xml,json,ttf
 version = 1.0.0
 
 # Requirements
-requirements = python3,kivy,kivymd,materialyoucolor,asynckivy,asyncgui,yt-dlp,requests,certifi,urllib3,idna,charset-normalizer,ffmpeg
-
-
+requirements = python3==3.11.5,hostpython3==3.11.5,kivy=2.3.0,kivymd,p4a.branch=v2024.01.21,materialyoucolor,asynckivy,asyncgui,yt-dlp,requests,certifi,urllib3,idna,charset-normalizer,ffmpeg
 
 # Android settings
 android.api = 36
@@ -47,7 +45,7 @@ orientation = portrait
 kivy_garden_requirements =
 
 # Python-for-Android
-p4a.branch = master
+p4a.branch = v2024.01.21
 p4a.bootstrap = sdl2
 
 # Log level
